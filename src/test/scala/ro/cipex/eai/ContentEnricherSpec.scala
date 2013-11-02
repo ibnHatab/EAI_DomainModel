@@ -38,6 +38,7 @@ class AccountEnricherDispatcher(accountSystemDispatcher: ActorRef) extends Actor
     case doctorVisitCompleted: DoctorVisitCompleted =>
       log.debug("AccountEnricher: query and forward")
       val (lastName, carrier, socialSecurityNumber) = ("Doe", "Kaiser", "111-22-3333")
+
       doctorVisitCompleted.enrichWith(PatientDetails(lastName, socialSecurityNumber, carrier))
       accountSystemDispatcher forward doctorVisitCompleted
     case _ =>
@@ -77,6 +78,7 @@ class ContentEnricherSpec extends TestKit(ActorSystem("EAI"))
       val accountSystemDispatcher =
         system.actorOf(Props(
           new AccountSystemDispatcher(reception.ref)), "accountSystem")
+
       val accountEnricherDispatcher =
         system.actorOf(Props(
           new AccountEnricherDispatcher(accountSystemDispatcher)), "accountEnricher")
