@@ -1,4 +1,4 @@
-package ro.cipex.eai.request_reply_spec
+package ro.cipex.eai.pattern.request_reply_spec
 
 import org.scalatest.WordSpecLike
 import org.scalatest.matchers._

@@ -1,4 +1,4 @@
-package ro.cipex.eai.message_bus
+package ro.cipex.eai.pattern.message_bus
 
 import scala.language.postfixOps
 import scala.collection.mutable
@@ -28,7 +28,7 @@ case class RegisterNotificationInterest(appId: String, notificationId: String, h
 case class TradingCommand(commandId: String, command: Any)
 case class TraidingNotification(notificationId: String, notification: Any)
 
-case class Status
+case class Status ()
 
 class MarketAnalysisTool(tradingBus: ActorRef) extends Actor with ActorLogging {
 

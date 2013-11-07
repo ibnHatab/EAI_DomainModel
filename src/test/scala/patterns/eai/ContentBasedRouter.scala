@@ -1,4 +1,4 @@
-package ro.cipex.eai.content_based_router
+package ro.cipex.eai.pattern.content_based_router
 
 import scala.language.postfixOps
 import scala.collection.mutable

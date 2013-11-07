@@ -1,4 +1,4 @@
-package ro.cipex.eai.routing_slip
+package ro.cipex.eai.pattern.routing_slip
 
 import scala.language.postfixOps
 import scala.collection.mutable

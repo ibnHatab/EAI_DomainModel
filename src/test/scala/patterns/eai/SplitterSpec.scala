@@ -1,4 +1,4 @@
-package ro.cipex.eai.splitter
+package ro.cipex.eai.pattern.splitter
 
 import scala.language.postfixOps
 import scala.collection.mutable

@@ -1,4 +1,4 @@
-package ro.cipex.eai.resequencer
+package ro.cipex.eai.pattern.resequencer
 
 import scala.language.postfixOps
 import scala.collection.mutable

@@ -1,4 +1,4 @@
-package ro.cipex.eai.content_filter
+package ro.cipex.eai.pattern.content_filter
 
 import scala.language.postfixOps
 

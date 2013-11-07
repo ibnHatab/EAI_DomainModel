@@ -1,4 +1,4 @@
-package ro.cipex.eai.claim_check
+package ro.cipex.eai.pattern.claim_check
 
 import scala.language.postfixOps
 import scala.collection.mutable

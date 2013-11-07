@@ -2,7 +2,6 @@
 <configuration scan="true" scanPeriod="5 seconds">
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <!-- <pattern>%date{ISO8601} %-5level %logger{36} %X{sourceThread} - %msg%n</pattern> -->
       <pattern>%-5level %logger{26} - %msg%n</pattern>
     </encoder>
   </appender>
@@ -22,17 +21,18 @@
   	<encoder>
     	<pattern>%date{ISO8601} %-5level %logger{36} %X{sourceThread} - %msg%n</pattern>
   	</encoder>
-	</appender>
+        </appender>
 
-	<logger name = "akka.actor" level = "DEBUG" >
+        <logger name = "akka.actor" level = "DEBUG" >
   	<appender-ref ref = "FILE" />
   	<appender-ref ref = "STDOUT" />
-	</logger>
+        </logger>
 
-	<root>
-		<level value="DEBUG" />
-		<appender-ref ref="STDOUT" />
-	</root>
+        <root>
+        	<level value="DEBUG" />
+        	<appender-ref ref="STDOUT" />
+        </root>
 </configuration>  
 
 
+      <!-- <pattern>%date{ISO8601} %-5level %logger{36} %X{sourceThread} - %msg%n</pattern> -->

@@ -1,4 +1,4 @@
-package ro.cipex.eai.dynamic_router
+package ro.cipex.eai.pattern.dynamic_router
 
 import scala.language.postfixOps
 import scala.collection.mutable

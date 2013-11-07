@@ -1,4 +1,4 @@
-package ro.cipex.eai.return_address
+package ro.cipex.eai.pattern.return_address
 
 import org.scalatest.WordSpecLike
 import org.scalatest.matchers._

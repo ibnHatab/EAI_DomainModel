@@ -1,4 +1,4 @@
-package ro.cipex.eai.content_enricher
+package ro.cipex.eai.pattern.content_enricher
 
 import scala.language.postfixOps
 

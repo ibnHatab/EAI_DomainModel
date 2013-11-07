@@ -1,4 +1,4 @@
-package ro.cipex.eai.message_expiration
+package ro.cipex.eai.pattern.message_expiration
 
 import scala.language.postfixOps
 import scala.collection.mutable
