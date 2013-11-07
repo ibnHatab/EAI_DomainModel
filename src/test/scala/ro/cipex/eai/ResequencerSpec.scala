@@ -40,7 +40,7 @@ class MessageSequencer(sinc: ActorRef) extends Actor with ActorLogging {
       val (curIndex, queue) = messageMap(message.correlatioId)
       messageMap(message.correlatioId) = unsequence(curIndex, sequence(queue, message))
     case m =>
-      log.warning(s"$self: receive unexpected $m")
+       log.warning(s"$self: receive unexpected $m")
   }
 }
 

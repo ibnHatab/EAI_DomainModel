@@ -28,8 +28,7 @@ case class RegisterNotificationInterest(appId: String, notificationId: String, h
 case class TradingCommand(commandId: String, command: Any)
 case class TraidingNotification(notificationId: String, notification: Any)
 
-case class Status()
-
+case class Status
 
 class MarketAnalysisTool(tradingBus: ActorRef) extends Actor with ActorLogging {
 
@@ -74,7 +73,7 @@ class TraidingBus(s: Int) extends Actor with ActorLogging {
 
   var totalTegistered = 0
 
-  def dispatchCpmmand(command: TradingCommand) =
+  def dispatchCommand(command: TradingCommand) =
     for (handlers <- commandHandlers.get(command.commandId);
       commandHandlers <- handlers) {
       commandHandlers.handler  ! command.command
@@ -95,7 +94,7 @@ class TraidingBus(s: Int) extends Actor with ActorLogging {
       notificationInterest(notificationId) =
         notificationInterest(notificationId) :+ NotificationInterest(appId, handler)
     case command: TradingCommand =>
-      dispatchCpmmand(command)
+      dispatchCommand(command)
     case notification: TraidingNotification =>
       dispatchNotification(notification)
     case status: Status =>
