@@ -1,0 +1,372 @@
+# -*- org-confirm-babel-evaluate: nil -*-
+#+TITLE: Domain Driven Design patterns
+#+CATEGORY: design
+
+With references to http://vaughnvernon.co/ and his DDD book
+
+* Categories
+
+** EAI Patterns with Actor Model
+
+#+begin_src dot :file eai_patterns_relationship.png :cmdline -Kdot -Tpng
+digraph G {
+  size="8,6"
+  ratio=expand
+  edge[style=dotted, dir=none]
+
+  "Actor"            -> "Message" [label="communicate with"]
+  "Request-Reply"    -> "Return Address" [label="contain"]
+  "Message"          -> "Envelope Wrapper" [label="outside aggregate"]
+  "Content Enricher"
+  "ContentFilter"
+  "Splitter"
+  "Content-Based Router"
+
+}
+#+end_src
+
+#+RESULTS:
+[[file:eai_patterns_relationship.png]]
+
+*** Request-Reply
+    - When two applications communicate via Messaging, the
+      communication is one-way. The applications may want a two-way
+      conversation.
+    - When an application sends a message, how can it
+      get a response from the receiver?
+
+#+begin_src plantuml :file request_reply.png
+title Request-Reply
+hide footbox
+Alice -> Bob:  Request
+...
+Bob --> Alice: Reply
+
+#+end_src
+
+#+RESULTS:
+[[file:Request-Reply.png]]
+
+     - Send a pair of Request-Reply messages, each on its own channel.
+
+     - Request-Reply has two participants
+
+     - [[file:src/test/scala/patterns/eai/RequestReplySpec.scala::class%20RequestReplySpec%20extends%20TestKit(ActorSystem("EAI"))][RequestReplySpec.scala]]
+
+
+*** Return Address
+    - My application is using Messaging to perform a Request-Reply.
+    - How does a replier know where to send the reply?
+    - The request message should contain a Return Address that
+      indicates where to send the reply message.
+
+    - [ ] Server create a child Worker to handle a specific kind of
+      complex message, but Worker to reply to the original Client
+      sender, not to the parent Server.
+      
+#+begin_src plantuml :file return_address.png
+title ReturnAddress
+hide footbox
+
+Client -> Server:  Request(client.pid)
+Server -> Worker: forward(Request(client.pid))
+...
+Worker --> Client: Reply
+
+#+end_src
+
+#+RESULTS:
+[[file:return_address.png]]
+    - The request message should contain a Return Address that
+      indicates where to send the reply message.
+
+    - This way, the replier does not need to know where to send the
+      reply, it can just ask the request. If different messages to the
+      same replier require replies to different places, the replier
+      knows where to send the reply for each request. This
+      encapsulates the knowledge of what channels to use for requests
+      and replies within the requestor so those decisions do not have
+      to be hard coded within the replier. A Return Address is put in
+      the header of a message because it’s not part of the data being
+      transmitted.
+
+      ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/ReturnAddressSpec.scala::class%20ReturnAddressSpec%20extends%20TestKit(ActorSystem("EAI"))][ReturnAddressSpec.scala]]
+
+*** Envelope Wrapper   
+    - http://www.eaipatterns.com/EnvelopeWrapper.html
+
+    - How can existing systems participate in a messaging exchange
+      that places specific requirements on the message format, such as
+      message header fields or encryption?    
+      
+    - Use a Envelope Wrapper to wrap application data inside an
+      envelope that is compliant with the messaging
+      infrastructure. Unwrap the message when it arrives at the
+      destination.
+  
+*** Content Enricher
+    - When sending messages from one system to another it is common
+      for the target system to require more information than the
+      source system can provide.
+
+    - How do we communicate with another system if the message
+      originator does not have all the required data items available?
+
+    - Use a specialized transformer, a Content Enricher, to access an
+      external data source in order to augment a message with missing
+      information.
+
+    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/ContentEnricherSpec.scala::class%20ContentEnricherSpec%20extends%20TestKit(ActorSystem("EAI"))][ContentEnricherSpec.scala]]
+          
+#+begin_src plantuml :file content_enricher_spec.png
+title content_enricher_spec
+hide footbox
+create reception
+create SheduledDoctorVisit
+reception -> SheduledDoctorVisit: new("Joe")
+
+reception -> SheduledDoctorVisit: CompleteVisit(accountEnricher)
+SheduledDoctorVisit -> AccountEnricherDispatcher: DoctorVisitCompleted
+AccountEnricherDispatcher -> AccountEnricherDispatcher: query("Joe")
+AccountEnricherDispatcher -> AccountSystemDispatcher: forward(DoctorVisitCompleted("Joe, Doe"))
+reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
+#+end_src
+
+#+RESULTS:
+[[file:ContentEnricherSpec.png]]
+
+*** ContentFilter
+    - The Content Enricher helps us in situations where a message
+      receiver requires more - or different - data elements than the
+      message creator provides.
+
+    - Use a Content Filter to remove unimportant data items from a
+      message leaving only important items.
+
+    - Enricher deals with outgoing messages, MessageFilter with incoming
+
+    - [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/ContentFilterSpec.scala::class%20ContentFilterSpec%20extends%20TestKit(ActorSystem("EAI"))][ex: ContentFilterSpec.scala]]
+      
+*** Splitter
+    - How can we process a message if it contains multiple elements,
+      each of which may have to be processed in a different way?
+
+    - Use a Splitter to break out the composite message into a series
+      of individual messages, each containing data related to one item.
+
+    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/SplitterSpec.scala::class%20SplitterSpec%20extends%20TestKit(ActorSystem("EAI"))][ContentFilterSpec.scala]]
+      
+*** Content-Based Router
+    - http://www.eaipatterns.com/ContentBasedRouter.html
+    - How do we handle a situation where the implementation of a
+      single logical function (e.g., inventory check) is spread across
+      multiple physical systems?
+
+    - Use a Content-Based Router to route each message to the correct
+      recipient based on message content.
+
+    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/ContentBasedRouter.scala::class%20ContentBasedRouter%20extends%20TestKit(ActorSystem("EAI"))][ContentBasedRouter.scala]]
+      
+*** Dynamic Router
+    - http://www.eaipatterns.com/DynamicRouter.html
+
+    - How can you avoid the dependency of the router on all possible
+      destinations while maintaining its efficiency?
+
+    - Use a Dynamic Router, a Router that can self-configure based on
+      special configuration messages from participating destinations.
+
+    - Besides the usual input and output channels the Dynamic Router
+      uses an additional control channel. During system start-up, each
+      potential recipient sends a special message to the Dynamic
+      Router on this control channel, announcing its presence and
+      listing the conditions under which it can handle a message. The
+      Dynamic Router stores the 'preferences' for each participant in
+      a rule base.
+
+    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/DynamicRouter.scala::class%20DynamicRouterRouter%20extends%20TestKit(ActorSystem("EAI"))][DynamicRouterRouter.scala]]
+           
+*** Routing Slip
+    - http://www.eaipatterns.com/RoutingTable.html
+
+    - How do we route a message consecutively through a series of
+      processing steps when the sequence of steps is not known at
+      design-time and may vary for each message?
+
+    - Attach a Routing Slip to each message, specifying the sequence
+      of processing steps. Wrap each component with a special message
+      router that reads the Routing Slip and routes the message to the
+      next component in the list.
+
+    - ec: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/RoutingSlip.scala::class%20RoutingSlipSpec%20extends%20TestKit(ActorSystem("EAI"))][RoutingSlipSpec.scala]]
+
+    - rem: good start for Sequencer
+           
+*** Recipient List
+    - http://www.eaipatterns.com/RecipientList.html
+    - How do we route a message to a list of dynamically specified
+      recipients?
+
+    - Define a channel for each recipient. Then use a Recipient List
+      to inspect an incoming message, determine the list of desired
+      recipients, and forward the message to all channels associated
+      with the recipients in the list.
+
+    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/RecipientListSpec.scala::class%20RecipientListSpec%20extends%20TestKit(ActorSystem("EAI"))][RecipientListSpec.scala]]   
+
+*** Aggregat
+    - http://www.eaipatterns.com/Aggregator.html
+    - How do we combine the results of individual, but related
+      messages so that they can be processed as a whole?
+    - Use a stateful filter, an Aggregator, to collect and store
+      individual messages until a complete set of related messages has
+      been received. Then, the Aggregator publishes a single message
+      distilled from the individual messages.
+    - The Aggregator is a special Filter that receives a stream of
+      messages and identifies messages that are correlated.
+    - termination criteria:
+      - Wait for All
+      - Timeout
+      - First Best
+      - Timeout with Override
+      - External Event
+    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/RecipientListSpec.scala::class%20RecipientListSpec%20extends%20TestKit(ActorSystem("EAI"))][RecipientListSpec.scala]]   + Aggregator
+
+*** Scatter-Gather
+    - https://vaughnvernon.co/?p=561
+    - How do you maintain the overall message flow when a message
+      needs to be sent to multiple recipients, each of which may send
+      a reply?
+    - Use a Scatter-Gather that broadcasts a message to multiple
+      recipients and re-aggregates the responses back into a single
+      message.
+    - When using Publishes-Subscriber and feeding result to Aggregator
+      termination creteria might not terminate (no pun
+      intended). There for we must use timeout on 'gather pass.
+    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/Scatter-Gather.scala::class%20ScatterGatherSpec%20extends%20TestKit(ActorSystem("EAI"))][ScatterGatherSpec.scala]]
+*** Resequencer
+    - http://www.eaipatterns.com/Resequencer.html
+    - How can we get a stream of related but out-of-sequence messages
+      back into the correct order?
+    - Use a stateful filter, a Resequencer, to collect and re-order
+      messages so that they can be published to the output channel in
+      a specified order.
+    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/ResequencerSpec.scala::class%20ResequencerSpec%20extends%20TestKit(ActorSystem("EAI"))][ResequencerSpec.scala]]
+
+*** Claim Check
+    - http://www.eaipatterns.com/StoreInLibrary.html
+    - How can we reduce the data volume of message sent across the
+      system without sacrificing information content?
+    - Store message data in a persistent store and pass a Claim Check
+      to subsequent components. These components can use the Claim
+      Check to retrieve the stored information.
+    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/ClaimCheckSpec.scala::class%20ClaimCheckSpec%20extends%20TestKit(ActorSystem("EAI"))][ClaimCheckSpec.scala]]
+
+*** Message Expiration
+    - http://www.eaipatterns.com/MessageExpiration.html
+
+    - How can a sender indicate when a message should be considered
+      stale and thus shouldn’t be processed?
+
+    - Set the Message Expiration to specify a time limit how long the
+      message is viable.
+
+    - Most messaging system implementations reroute expired messages
+      to the Dead Letter Channel
+
+    - use System.currentTimeMillis to avoid TZ issue
+
+    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/MessageExpirationSpec.scala::class%20MessageExpirationSpec%20extends%20TestKit(ActorSystem("EAI"))][MessageExpirationSpec.scala]]
+
+*** Message Bus
+    - http://www.eaipatterns.com/MessageBus.html
+    - What is an architecture that enables separate applications to
+      work together, but in a decoupled fashion such that applications
+      can be easily added or removed without affecting the others?
+
+    - Structure the connecting middleware between these applications
+      as a Message Bus that enables them to work together using
+      messaging.
+
+    - Canonical Data Model that is independent from any specific
+      application. Require each application to produce and consume
+      messages in this common format.
+
+    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/MessageBusSpec.scala::class%20MessageBusSpec%20extends%20TestKit(ActorSystem("EAI"))][MessageBusSpec.scala]]
+      
+*** Message Channel    
+    - http://www.eaipatterns.com/MessageChannel.html
+    - How does one application communicate with another using
+      messaging?
+
+    - Connect the applications using a Message Channel, where one
+      application writes information to the channel and the other one
+      reads that information from the channel.
+
+    - Events cannot fail when being replayed to a processor, in
+      contrast to commands
+      
+      
+
+** Aggregates + Event Sourcing
+   The current Aggregate state can be defined as a left fold of all
+   past Events that are passed to the mutating functions.
+
+   Here be dragons - [[http://martinfowler.com/eaaDev/EventSourcing.html][Event Sourcing]] origins.
+
+   Implementing Domain-Driven Design / [[http://search.safaribooksonline.com/9780133039900/app01_html][Appendix A]]. Aggregates and Event Sourcing: A+ES
+
+*** Akka persistency
+    - http://doc.akka.io/docs/akka/2.3-M1/scala/persistence.html
+    
+    - 
+
+** Actor Idioms for Erlang
+   
+   - Dale Schumacher [[http://apice.unibo.it/xwiki/bin/download/AGERE2012/AcceptedPapers/ageresplash2012submission3.pdf][paper on subject]].  
+   - [[http://www.dalnefre.com/wp/2013/10/towards-a-universal-implementation-of-unforgeable-actor-addresses/][Actor calculus]] in blog
+     
+*** Idoms with relations to EAI patterns
+   [[file:actor-idiom-relationship.png]]
+
+   - Basic Plumbing
+     - Service (DDD Service)
+     - Customer 
+     - Sink
+     - Forward
+     - Label (EAI Envelop)
+     - Tag
+     - Sync-Signal
+   - State
+     - State-Machine
+     - One-Shot (Idempotence)
+     - Race (EAI Recipient List)
+     - Work-Order (EAI Routing Slip)
+   - Coordination
+     - Capability (The Object-Capability Model)
+     - Authorization-Token
+     - Future (akka.Future)
+     - Lazy-Result
+     - Fork-Join (Scatter-Gather)
+     - Serializer
+   - Conﬁguration
+     - Stem-Cell
+     - Upgrade
+
+       
+* org-config                                                        :ARCHIVE:
+#+STARTUP: content hidestars logdone
+#+TAGS: DOCS(d) CODING(c) TESTING(t) PLANING(p)
+#+LINK_UP: sitemap.html
+#+LINK_HOME: main.html
+#+COMMENT: toc:nil
+#+OPTIONS: ^:nil
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+DESCRIPTION: Augment design process with system property discovering aid.
+#+KEYWORDS: SmallCell,
+#+LANGUAGE: en
+#+PROPERTY: Effort_ALL  1:00 2:00 4:00 6:00 8:00 12:00
+#+COLUMNS: %38ITEM(Details) %TAGS(Context) %7TODO(To Do) %5Effort(Time){:} %6CLOCKSUM{Total}
+
+#+STYLE: <link rel="stylesheet" type="text/css" href="org-manual.css" />
