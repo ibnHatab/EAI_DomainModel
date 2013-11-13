@@ -8,7 +8,7 @@ With references to Vaughn Vernon @ http://vaughnvernon.co/ and his DDD book
 
 ** EAI Patterns with Actor Model
 
-#+begin_src dot :file eai_patterns_relationship.png :cmdline -Kdot -Tpng
+#+begin_src dot :file img/eai_patterns_relationship.png :cmdline -Kdot -Tpng
 digraph G {
   size="8,6"
   ratio=expand
@@ -35,7 +35,7 @@ digraph G {
     - When an application sends a message, how can it
       get a response from the receiver?
 
-#+begin_src plantuml :file request_reply.png
+#+begin_src plantuml :file img/request_reply.png
 title Request-Reply
 hide footbox
 Alice -> Bob:  Request
@@ -63,7 +63,7 @@ Bob --> Alice: Reply
       complex message, but Worker to reply to the original Client
       sender, not to the parent Server.
       
-#+begin_src plantuml :file return_address.png
+#+begin_src plantuml :file img/return_address.png
 title ReturnAddress
 hide footbox
 
@@ -117,7 +117,7 @@ Worker --> Client: Reply
 
     - ex: [[file:src/test/scala/patterns/eai/ContentEnricherSpec.scala::class%20ContentEnricherSpec%20extends%20TestKit(ActorSystem("EAI"))][ContentEnricherSpec.scala]]
           
-#+begin_src plantuml :file content_enricher_spec.png
+#+begin_src plantuml :file img/content_enricher_spec.png
 title content_enricher_spec
 hide footbox
 create reception
@@ -332,7 +332,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
      
 *** Idoms with relations to EAI patterns
 
-    [[file:actor_idiom_relationship.png]]
+    [[file:img/actor_idiom_relationship.png]]
 
    - Basic Plumbing
      - Service (DDD Service)
