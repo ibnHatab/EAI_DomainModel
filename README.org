@@ -321,9 +321,11 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
     - persistency processor: [[file:src/test/scala/patterns/a_es/ProcessorSpec.scala][ProcessorSpec.scala]]
 
     - channel with delivery guaranty persistency processor: [[file:src/test/scala/patterns/a_es/PersistentOnChannelSpec.scala::class%20PersistentOnChannelSpec%20extends%20TestKit(ActorSystem("EAI"))][PersistentOnChannelSpec.scala]]
+      - write-ahead-log for whatever Persistent messages a processor receives
+      - command sourcing
 
     - event sourcing [[file:src/test/scala/patterns/a_es/EventSourcingSpec.scala::class%20EventSourcingSpec%20extends%20TestKit(ActorSystem("EAI"))][EventSourcingSpec.scala]]
-
+      
 
 ** Actor Idioms for Erlang
    

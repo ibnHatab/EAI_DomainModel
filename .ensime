@@ -67,4 +67,5 @@
 "/local/home/vlad/.ivy2/cache/com.typesafe.akka/akka-testkit_2.10/bundles/akka-testkit_2.10-2.3-SNAPSHOT.jar"
 "/local/home/vlad/.ivy2/cache/org.scalatest/scalatest_2.10/jars/scalatest_2.10-2.0.jar"
 "/local/home/vlad/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.10.0.jar"
-"/local/vlad/repos/ddd/EAI_DomainModel/target/scala-2.10/classes"))))
+"/local/vlad/repos/ddd/EAI_DomainModel/target/scala-2.10/classes"
+"/local/vlad/repos/ddd/EAI_DomainModel/target/scala-2.10/test-classes"))))
