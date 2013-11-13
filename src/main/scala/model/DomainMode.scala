@@ -1,5 +1,4 @@
-
-package ro.cipex.eai
+package ro.cipex.eai.domain
 
 import scala.concurrent.Await
 import akka.actor.Actor

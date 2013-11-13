@@ -1,4 +1,4 @@
-package ro.cipex.eai
+package ro.cipex.eai.domain
 
 import org.scalatest.WordSpecLike
 import org.scalatest.Matchers
