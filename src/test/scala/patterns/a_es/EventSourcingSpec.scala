@@ -1,4 +1,4 @@
-package patterns.eai.persistenceevent_sourcing_example
+package patterns.a_es.event_sourcing
 
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -11,6 +11,13 @@ import akka.event.LoggingReceive
 
 import akka.persistence._
 
+import org.scalatest.Matchers
+import org.scalatest.WordSpecLike
+
+import akka.testkit.ImplicitSender
+import akka.testkit.TestKit
+import akka.testkit.TestProbe
+import akka.util.Timeout
 
 case class Cmd(data: String)
 case class Evt(data: String)
@@ -34,14 +41,16 @@ class ExProcessor extends EventsourcedProcessor with ActorLogging {
 
 }
 
-object EventSourcingExemple extends App {
+// Application
+class EventSourcingSpec extends TestKit(ActorSystem("EAI"))
+    with ImplicitSender with WordSpecLike with Matchers {
 
-  val system = ActorSystem("example")
-  import system.dispatcher
+  "EventSourcing" should {
 
-  system.log.info(">> START")
+    "Save Domain Events" in {
 
-  Thread.sleep(1000)
-  system.shutdown()
+    }
+    system.shutdown()
+  }
 }
 

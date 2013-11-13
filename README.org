@@ -2,7 +2,7 @@
 #+TITLE: Domain Driven Design patterns
 #+CATEGORY: design
 
-With references to http://vaughnvernon.co/ and his DDD book
+With references to Vaughn Vernon @ http://vaughnvernon.co/ and his DDD book
 
 * Categories
 
@@ -53,7 +53,6 @@ Bob --> Alice: Reply
 
      - [[file:src/test/scala/patterns/eai/RequestReplySpec.scala::class%20RequestReplySpec%20extends%20TestKit(ActorSystem("EAI"))][RequestReplySpec.scala]]
 
-
 *** Return Address
     - My application is using Messaging to perform a Request-Reply.
     - How does a replier know where to send the reply?
@@ -90,7 +89,7 @@ Worker --> Client: Reply
       the header of a message because it’s not part of the data being
       transmitted.
 
-      ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/ReturnAddressSpec.scala::class%20ReturnAddressSpec%20extends%20TestKit(ActorSystem("EAI"))][ReturnAddressSpec.scala]]
+      ex: [[file:src/test/scala/patterns/eai/ReturnAddressSpec.scala::class%20ReturnAddressSpec%20extends%20TestKit(ActorSystem("EAI"))][ReturnAddressSpec.scala]]
 
 *** Envelope Wrapper   
     - http://www.eaipatterns.com/EnvelopeWrapper.html
@@ -116,7 +115,7 @@ Worker --> Client: Reply
       external data source in order to augment a message with missing
       information.
 
-    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/ContentEnricherSpec.scala::class%20ContentEnricherSpec%20extends%20TestKit(ActorSystem("EAI"))][ContentEnricherSpec.scala]]
+    - ex: [[file:src/test/scala/patterns/eai/ContentEnricherSpec.scala::class%20ContentEnricherSpec%20extends%20TestKit(ActorSystem("EAI"))][ContentEnricherSpec.scala]]
           
 #+begin_src plantuml :file content_enricher_spec.png
 title content_enricher_spec
@@ -133,9 +132,9 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
 #+end_src
 
 #+RESULTS:
-[[file:ContentEnricherSpec.png]]
 
 *** ContentFilter
+
     - The Content Enricher helps us in situations where a message
       receiver requires more - or different - data elements than the
       message creator provides.
@@ -145,7 +144,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
 
     - Enricher deals with outgoing messages, MessageFilter with incoming
 
-    - [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/ContentFilterSpec.scala::class%20ContentFilterSpec%20extends%20TestKit(ActorSystem("EAI"))][ex: ContentFilterSpec.scala]]
+    - [[file:src/test/scala/patterns/eai/ContentFilterSpec.scala::class%20ContentFilterSpec%20extends%20TestKit(ActorSystem("EAI"))][ex: ContentFilterSpec.scala]]
       
 *** Splitter
     - How can we process a message if it contains multiple elements,
@@ -154,7 +153,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
     - Use a Splitter to break out the composite message into a series
       of individual messages, each containing data related to one item.
 
-    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/SplitterSpec.scala::class%20SplitterSpec%20extends%20TestKit(ActorSystem("EAI"))][ContentFilterSpec.scala]]
+    - ex: [[file:src/test/scala/patterns/eai/SplitterSpec.scala::class%20SplitterSpec%20extends%20TestKit(ActorSystem("EAI"))][ContentFilterSpec.scala]]
       
 *** Content-Based Router
     - http://www.eaipatterns.com/ContentBasedRouter.html
@@ -165,7 +164,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
     - Use a Content-Based Router to route each message to the correct
       recipient based on message content.
 
-    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/ContentBasedRouter.scala::class%20ContentBasedRouter%20extends%20TestKit(ActorSystem("EAI"))][ContentBasedRouter.scala]]
+    - ex: [[file:src/test/scala/patterns/eai/ContentBasedRouter.scala::class%20ContentBasedRouter%20extends%20TestKit(ActorSystem("EAI"))][ContentBasedRouter.scala]]
       
 *** Dynamic Router
     - http://www.eaipatterns.com/DynamicRouter.html
@@ -184,7 +183,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
       Dynamic Router stores the 'preferences' for each participant in
       a rule base.
 
-    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/DynamicRouter.scala::class%20DynamicRouterRouter%20extends%20TestKit(ActorSystem("EAI"))][DynamicRouterRouter.scala]]
+    - ex: [[file:src/test/scala/patterns/eai/DynamicRouter.scala::class%20DynamicRouterRouter%20extends%20TestKit(ActorSystem("EAI"))][DynamicRouterRouter.scala]]
            
 *** Routing Slip
     - http://www.eaipatterns.com/RoutingTable.html
@@ -198,7 +197,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
       router that reads the Routing Slip and routes the message to the
       next component in the list.
 
-    - ec: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/RoutingSlip.scala::class%20RoutingSlipSpec%20extends%20TestKit(ActorSystem("EAI"))][RoutingSlipSpec.scala]]
+    - ec: [[file:src/test/scala/patterns/eai/RoutingSlip.scala::class%20RoutingSlipSpec%20extends%20TestKit(ActorSystem("EAI"))][RoutingSlipSpec.scala]]
 
     - rem: good start for Sequencer
            
@@ -212,7 +211,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
       recipients, and forward the message to all channels associated
       with the recipients in the list.
 
-    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/RecipientListSpec.scala::class%20RecipientListSpec%20extends%20TestKit(ActorSystem("EAI"))][RecipientListSpec.scala]]   
+    - ex: [[file:src/test/scala/patterns/eai/RecipientListSpec.scala::class%20RecipientListSpec%20extends%20TestKit(ActorSystem("EAI"))][RecipientListSpec.scala]]   
 
 *** Aggregat
     - http://www.eaipatterns.com/Aggregator.html
@@ -230,7 +229,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
       - First Best
       - Timeout with Override
       - External Event
-    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/RecipientListSpec.scala::class%20RecipientListSpec%20extends%20TestKit(ActorSystem("EAI"))][RecipientListSpec.scala]]   + Aggregator
+    - ex: [[file:src/test/scala/patterns/eai/RecipientListSpec.scala::class%20RecipientListSpec%20extends%20TestKit(ActorSystem("EAI"))][RecipientListSpec.scala]]   + Aggregator
 
 *** Scatter-Gather
     - https://vaughnvernon.co/?p=561
@@ -243,7 +242,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
     - When using Publishes-Subscriber and feeding result to Aggregator
       termination creteria might not terminate (no pun
       intended). There for we must use timeout on 'gather pass.
-    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/Scatter-Gather.scala::class%20ScatterGatherSpec%20extends%20TestKit(ActorSystem("EAI"))][ScatterGatherSpec.scala]]
+    - ex: [[file:src/test/scala/patterns/eai/Scatter-Gather.scala::class%20ScatterGatherSpec%20extends%20TestKit(ActorSystem("EAI"))][ScatterGatherSpec.scala]]
 *** Resequencer
     - http://www.eaipatterns.com/Resequencer.html
     - How can we get a stream of related but out-of-sequence messages
@@ -251,7 +250,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
     - Use a stateful filter, a Resequencer, to collect and re-order
       messages so that they can be published to the output channel in
       a specified order.
-    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/ResequencerSpec.scala::class%20ResequencerSpec%20extends%20TestKit(ActorSystem("EAI"))][ResequencerSpec.scala]]
+    - ex: [[file:src/test/scala/patterns/eai/ResequencerSpec.scala::class%20ResequencerSpec%20extends%20TestKit(ActorSystem("EAI"))][ResequencerSpec.scala]]
 
 *** Claim Check
     - http://www.eaipatterns.com/StoreInLibrary.html
@@ -260,7 +259,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
     - Store message data in a persistent store and pass a Claim Check
       to subsequent components. These components can use the Claim
       Check to retrieve the stored information.
-    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/ClaimCheckSpec.scala::class%20ClaimCheckSpec%20extends%20TestKit(ActorSystem("EAI"))][ClaimCheckSpec.scala]]
+    - ex: [[file:src/test/scala/patterns/eai/ClaimCheckSpec.scala::class%20ClaimCheckSpec%20extends%20TestKit(ActorSystem("EAI"))][ClaimCheckSpec.scala]]
 
 *** Message Expiration
     - http://www.eaipatterns.com/MessageExpiration.html
@@ -276,7 +275,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
 
     - use System.currentTimeMillis to avoid TZ issue
 
-    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/MessageExpirationSpec.scala::class%20MessageExpirationSpec%20extends%20TestKit(ActorSystem("EAI"))][MessageExpirationSpec.scala]]
+    - ex: [[file:src/test/scala/patterns/eai/MessageExpirationSpec.scala::class%20MessageExpirationSpec%20extends%20TestKit(ActorSystem("EAI"))][MessageExpirationSpec.scala]]
 
 *** Message Bus
     - http://www.eaipatterns.com/MessageBus.html
@@ -292,7 +291,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
       application. Require each application to produce and consume
       messages in this common format.
 
-    - ex: [[file:/local/vlad/repos/ddd/EAI_DomainModel/src/test/scala/ro/cipex/eai/MessageBusSpec.scala::class%20MessageBusSpec%20extends%20TestKit(ActorSystem("EAI"))][MessageBusSpec.scala]]
+    - ex: [[file:src/test/scala/patterns/eai/MessageBusSpec.scala::class%20MessageBusSpec%20extends%20TestKit(ActorSystem("EAI"))][MessageBusSpec.scala]]
       
 *** Message Channel    
     - http://www.eaipatterns.com/MessageChannel.html
@@ -319,7 +318,12 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
 *** Akka persistency
     - http://doc.akka.io/docs/akka/2.3-M1/scala/persistence.html
     
-    - 
+    - persistency processor: [[file:src/test/scala/patterns/a_es/ProcessorSpec.scala][ProcessorSpec.scala]]
+
+    - channel with delivery guaranty persistency processor: [[file:src/test/scala/patterns/a_es/PersistentOnChannelSpec.scala::class%20PersistentOnChannelSpec%20extends%20TestKit(ActorSystem("EAI"))][PersistentOnChannelSpec.scala]]
+
+    - event sourcing [[file:src/test/scala/patterns/a_es/EventSourcingSpec.scala::class%20EventSourcingSpec%20extends%20TestKit(ActorSystem("EAI"))][EventSourcingSpec.scala]]
+
 
 ** Actor Idioms for Erlang
    
@@ -327,7 +331,8 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
    - [[http://www.dalnefre.com/wp/2013/10/towards-a-universal-implementation-of-unforgeable-actor-addresses/][Actor calculus]] in blog
      
 *** Idoms with relations to EAI patterns
-   [[file:actor-idiom-relationship.png]]
+
+    [[file:actor_idiom_relationship.png]]
 
    - Basic Plumbing
      - Service (DDD Service)
