@@ -5,64 +5,82 @@
 With references to Vaughn Vernon @ http://vaughnvernon.co/ and his DDD book
 
 * Categories
+  In relation with DDD following patterns form execution framework via
+  which:
+  - External world communicate with Domain Model
+  - Aggregates structure internal communication
+  - Upstream domain context execute saga's and scenarios
+  - Domain Events propagated and replayed
 
 ** EAI Patterns with Actor Model
 
 #+begin_src dot :file img/eai_patterns_relationship.png :cmdline -Kdot -Tpng
 digraph G {
-  size="8,6"
-  ratio=expand
-  edge[style=dotted, dir=none]
+  size="20"
+#  ratio=expand
+  edge[style=dotted]
 
-  "Actor"            -> "Message" [label="communicate with"]
-  "Request-Reply"    -> "Return Address" [label="contain"]
-  "Message"          -> "Envelope Wrapper" [label="outside aggregate"]
-  "Content Enricher"
-  "ContentFilter"
-  "Splitter"
-  "Content-Based Router"
+  Service              -> Request_Reply        [label="two-way communication"]
+  Customer             -> Service              [label="request service"]
+  Request_Reply        -> Return_Address       [label="to whom"]
+  Return_Address       -> Customer             [label="make explicit"]
+  Envelope_Wrapper                            
+  Content_Enricher     -> Claim_Check          [label="retreive"]
+  Content_Filter       -> Content_Enricher     [label="bypas to"]
+  Splitter             -> Resequencer          [label="reassemblly messages with"]
+  Scatter_Gather       -> Splitter       [label="meke flow transparent"]
+  Content_Based_Router -> Dynamic_Router       [label="add awarenes"]
+  Dynamic_Router                              
+  Routing_Slip         -> Content_Based_Router [label="direct"]
+  Recipient_List       -> Aggregat             [label="forward to"]
+  Aggregat             -> Scatter_Gather       [label="reduce from"]
+  Scatter_Gather       -> Recipient_List       [label="map to"]
+  Resequencer                                 
+  Claim_Check          -> Content_Filter       [label="store extra data from"]
+  Message_Expiration   -> Aggregat             [label="limit by timeout"]
+  Message_Bus          -> Envelope_Wrapper     [label="unify by"]
+  Message_Bus          -> Service              [label="broadcast"]
+  Message_Bus          -> Message_Channel      [label="implements"]
+  Message_Channel      -> Content_Based_Router [label="run by"]
+  
+
 
 }
 #+end_src
 
 #+RESULTS:
-[[file:eai_patterns_relationship.png]]
+[[file:img/eai_patterns_relationship.png]]
 
 *** Request-Reply
+    - http://www.eaipatterns.com/RequestReply.html
+
     - When two applications communicate via Messaging, the
       communication is one-way. The applications may want a two-way
       conversation.
+
     - When an application sends a message, how can it
       get a response from the receiver?
 
-#+begin_src plantuml :file img/request_reply.png
-title Request-Reply
-hide footbox
-Alice -> Bob:  Request
-...
-Bob --> Alice: Reply
+    - Send a pair of Request-Reply messages, each on its own channel.
 
-#+end_src
+    - Request-Reply has two participants
 
-#+RESULTS:
-[[file:Request-Reply.png]]
-
-     - Send a pair of Request-Reply messages, each on its own channel.
-
-     - Request-Reply has two participants
-
-     - [[file:src/test/scala/patterns/eai/RequestReplySpec.scala::class%20RequestReplySpec%20extends%20TestKit(ActorSystem("EAI"))][RequestReplySpec.scala]]
+    - ex: [[file:src/test/scala/patterns/eai/RequestReplySpec.scala::class%20RequestReplySpec%20extends%20TestKit(ActorSystem("EAI"))][RequestReplySpec.scala]]
 
 *** Return Address
+    - http://www.eaipatterns.com/ReturnAddress.html
+
     - My application is using Messaging to perform a Request-Reply.
+
     - How does a replier know where to send the reply?
+
     - The request message should contain a Return Address that
       indicates where to send the reply message.
 
-    - [ ] Server create a child Worker to handle a specific kind of
+    - Server create a child Worker to handle a specific kind of
       complex message, but Worker to reply to the original Client
       sender, not to the parent Server.
-      
+
 #+begin_src plantuml :file img/return_address.png
 title ReturnAddress
 hide footbox
@@ -80,30 +98,25 @@ Worker --> Client: Reply
       indicates where to send the reply message.
 
     - This way, the replier does not need to know where to send the
-      reply, it can just ask the request. If different messages to the
-      same replier require replies to different places, the replier
-      knows where to send the reply for each request. This
-      encapsulates the knowledge of what channels to use for requests
-      and replies within the requestor so those decisions do not have
-      to be hard coded within the replier. A Return Address is put in
-      the header of a message because it’s not part of the data being
-      transmitted.
+      reply, it can just ask the request.
 
       ex: [[file:src/test/scala/patterns/eai/ReturnAddressSpec.scala::class%20ReturnAddressSpec%20extends%20TestKit(ActorSystem("EAI"))][ReturnAddressSpec.scala]]
 
-*** Envelope Wrapper   
+*** Envelope Wrapper
     - http://www.eaipatterns.com/EnvelopeWrapper.html
 
     - How can existing systems participate in a messaging exchange
       that places specific requirements on the message format, such as
-      message header fields or encryption?    
-      
+      message header fields or encryption?
+
     - Use a Envelope Wrapper to wrap application data inside an
       envelope that is compliant with the messaging
       infrastructure. Unwrap the message when it arrives at the
       destination.
-  
+
 *** Content Enricher
+    - http://www.eaipatterns.com/DataEnricher.html
+
     - When sending messages from one system to another it is common
       for the target system to require more information than the
       source system can provide.
@@ -116,7 +129,7 @@ Worker --> Client: Reply
       information.
 
     - ex: [[file:src/test/scala/patterns/eai/ContentEnricherSpec.scala::class%20ContentEnricherSpec%20extends%20TestKit(ActorSystem("EAI"))][ContentEnricherSpec.scala]]
-          
+
 #+begin_src plantuml :file img/content_enricher_spec.png
 title content_enricher_spec
 hide footbox
@@ -134,6 +147,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
 #+RESULTS:
 
 *** ContentFilter
+    - http://www.eaipatterns.com/ContentFilter.html
 
     - The Content Enricher helps us in situations where a message
       receiver requires more - or different - data elements than the
@@ -145,7 +159,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
     - Enricher deals with outgoing messages, MessageFilter with incoming
 
     - [[file:src/test/scala/patterns/eai/ContentFilterSpec.scala::class%20ContentFilterSpec%20extends%20TestKit(ActorSystem("EAI"))][ex: ContentFilterSpec.scala]]
-      
+
 *** Splitter
     - How can we process a message if it contains multiple elements,
       each of which may have to be processed in a different way?
@@ -154,9 +168,10 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
       of individual messages, each containing data related to one item.
 
     - ex: [[file:src/test/scala/patterns/eai/SplitterSpec.scala::class%20SplitterSpec%20extends%20TestKit(ActorSystem("EAI"))][ContentFilterSpec.scala]]
-      
+
 *** Content-Based Router
     - http://www.eaipatterns.com/ContentBasedRouter.html
+
     - How do we handle a situation where the implementation of a
       single logical function (e.g., inventory check) is spread across
       multiple physical systems?
@@ -165,7 +180,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
       recipient based on message content.
 
     - ex: [[file:src/test/scala/patterns/eai/ContentBasedRouter.scala::class%20ContentBasedRouter%20extends%20TestKit(ActorSystem("EAI"))][ContentBasedRouter.scala]]
-      
+
 *** Dynamic Router
     - http://www.eaipatterns.com/DynamicRouter.html
 
@@ -184,7 +199,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
       a rule base.
 
     - ex: [[file:src/test/scala/patterns/eai/DynamicRouter.scala::class%20DynamicRouterRouter%20extends%20TestKit(ActorSystem("EAI"))][DynamicRouterRouter.scala]]
-           
+
 *** Routing Slip
     - http://www.eaipatterns.com/RoutingTable.html
 
@@ -200,7 +215,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
     - ec: [[file:src/test/scala/patterns/eai/RoutingSlip.scala::class%20RoutingSlipSpec%20extends%20TestKit(ActorSystem("EAI"))][RoutingSlipSpec.scala]]
 
     - rem: good start for Sequencer
-           
+
 *** Recipient List
     - http://www.eaipatterns.com/RecipientList.html
     - How do we route a message to a list of dynamically specified
@@ -211,7 +226,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
       recipients, and forward the message to all channels associated
       with the recipients in the list.
 
-    - ex: [[file:src/test/scala/patterns/eai/RecipientListSpec.scala::class%20RecipientListSpec%20extends%20TestKit(ActorSystem("EAI"))][RecipientListSpec.scala]]   
+    - ex: [[file:src/test/scala/patterns/eai/RecipientListSpec.scala::class%20RecipientListSpec%20extends%20TestKit(ActorSystem("EAI"))][RecipientListSpec.scala]]
 
 *** Aggregat
     - http://www.eaipatterns.com/Aggregator.html
@@ -292,8 +307,8 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
       messages in this common format.
 
     - ex: [[file:src/test/scala/patterns/eai/MessageBusSpec.scala::class%20MessageBusSpec%20extends%20TestKit(ActorSystem("EAI"))][MessageBusSpec.scala]]
-      
-*** Message Channel    
+
+*** Message Channel
     - http://www.eaipatterns.com/MessageChannel.html
     - How does one application communicate with another using
       messaging?
@@ -304,8 +319,8 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
 
     - Events cannot fail when being replayed to a processor, in
       contrast to commands
-      
-      
+
+
 
 ** Aggregates + Event Sourcing
    The current Aggregate state can be defined as a left fold of all
@@ -317,7 +332,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
 
 *** Akka persistency
     - http://doc.akka.io/docs/akka/2.3-M1/scala/persistence.html
-    
+
     - persistency processor: [[file:src/test/scala/patterns/a_es/ProcessorSpec.scala][ProcessorSpec.scala]]
 
     - channel with delivery guaranty persistency processor: [[file:src/test/scala/patterns/a_es/PersistentOnChannelSpec.scala::class%20PersistentOnChannelSpec%20extends%20TestKit(ActorSystem("EAI"))][PersistentOnChannelSpec.scala]]
@@ -325,20 +340,20 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
       - command sourcing
 
     - event sourcing [[file:src/test/scala/patterns/a_es/EventSourcingSpec.scala::class%20EventSourcingSpec%20extends%20TestKit(ActorSystem("EAI"))][EventSourcingSpec.scala]]
-      
+
 
 ** Actor Idioms for Erlang
-   
-   - Dale Schumacher [[http://apice.unibo.it/xwiki/bin/download/AGERE2012/AcceptedPapers/ageresplash2012submission3.pdf][paper on subject]].  
+
+   - Dale Schumacher [[http://apice.unibo.it/xwiki/bin/download/AGERE2012/AcceptedPapers/ageresplash2012submission3.pdf][paper on subject]].
    - [[http://www.dalnefre.com/wp/2013/10/towards-a-universal-implementation-of-unforgeable-actor-addresses/][Actor calculus]] in blog
-     
+
 *** Idoms with relations to EAI patterns
 
     [[file:img/actor_idiom_relationship.png]]
 
    - Basic Plumbing
      - Service (DDD Service)
-     - Customer 
+     - Customer
      - Sink
      - Forward
      - Label (EAI Envelop)
@@ -360,7 +375,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
      - Stem-Cell
      - Upgrade
 
-       
+
 * org-config                                                        :ARCHIVE:
 #+STARTUP: content hidestars logdone
 #+TAGS: DOCS(d) CODING(c) TESTING(t) PLANING(p)
