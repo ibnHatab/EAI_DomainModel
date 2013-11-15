@@ -93,7 +93,8 @@ Worker --> Client: Reply
 #+end_src
 
 #+RESULTS:
-[[file:return_address.png]]
+[[file:img/return_address.png]]
+
     - The request message should contain a Return Address that
       indicates where to send the reply message.
 
@@ -145,6 +146,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
 #+end_src
 
 #+RESULTS:
+[[file:img/content_enricher_spec.png]]
 
 *** ContentFilter
     - http://www.eaipatterns.com/ContentFilter.html
@@ -294,6 +296,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
 
 *** Message Bus
     - http://www.eaipatterns.com/MessageBus.html
+
     - What is an architecture that enables separate applications to
       work together, but in a decoupled fashion such that applications
       can be easily added or removed without affecting the others?
@@ -310,6 +313,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
 
 *** Message Channel
     - http://www.eaipatterns.com/MessageChannel.html
+
     - How does one application communicate with another using
       messaging?
 
@@ -323,6 +327,7 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
 
 
 ** Aggregates + Event Sourcing
+
    The current Aggregate state can be defined as a left fold of all
    past Events that are passed to the mutating functions.
 
