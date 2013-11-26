@@ -36,26 +36,26 @@ class Order(id: String, amount: Double) extends Actor {
   }
 }
 
-class EAI_DomainModelSpec extends TestKit(ActorSystem("DomainModel"// ,
-  // ConfigFactory.load(conf.customConf)
-)) with ImplicitSender with WordSpecLike with Matchers {
+// class EAI_DomainModelSpec extends TestKit(ActorSystem("DomainModel"// ,
+//   // ConfigFactory.load(conf.customConf)
+// )) with ImplicitSender with WordSpecLike with Matchers {
   
-  "DomainModel service" should {
-    "start and shutdown" in {
-      val model = DomainModel("prototype")
+//   "DomainModel service" should {
+//     "start and shutdown" in {
+//       val model = DomainModel("prototype")
 
-      model.registerAggregateType("Order")
+//       model.registerAggregateType("Order")
 
-      val order = model.aggregateOf("Order", Props(new Order("123", 249.95)), "123")
+//       val order = model.aggregateOf("Order", Props(new Order("123", 249.95)), "123")
 
-      order ! ProcessOrder()
+//       order ! ProcessOrder()
       
-      expectMsg('ok)
+//       expectMsg('ok)
       
-      model.shutdown()
+//       model.shutdown()
 
-      println("DomainModelPrototype: is completed.")
-    }
-  }
-}
+//       println("DomainModelPrototype: is completed.")
+//     }
+//   }
+// }
 

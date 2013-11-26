@@ -346,6 +346,19 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
 
     - event sourcing [[file:src/test/scala/patterns/a_es/EventSourcingSpec.scala::class%20EventSourcingSpec%20extends%20TestKit(ActorSystem("EAI"))][EventSourcingSpec.scala]]
 
+** Immutable Object Update
+   - http://www.theerlangelist.com/2013/07/immutable-programming-fp-style.html
+
+   - When needed to combine Entity behavior with Entity update 
+
+   - Use Value as conceptual whole to replace properties. 
+
+     - ex: [[file:src/test/scala/model/ImmutableObject.scala::class%20ImmutableObjectSpec%20extends%20WordSpecLike%20with%20Matchers%20{][ImmutableObject.scala]]
+
+   - Use Validator to trigger action on new whole value.
+
+     - ex: [[file:src/test/scala/monad.sc::case%20class%20LG%5BT%5D%20(val%20session:%20T)%20{][monad.sc]]
+
 
 ** Actor Idioms for Erlang
 
