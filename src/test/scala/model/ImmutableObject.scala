@@ -51,10 +51,18 @@ case class Company (
 
   def maybe_update_employee(update: Employee => Employee)(employee: Option[Employee]) =
     employee match {
-      case None => self
-      case Some(e) => update(e) |> store_employee
+      case None => None
+      case Some(e) =>
+        update(e) |> store_employee
     }
+}
 
+object Company {
+  def factory(name: String, input: List[(String, Double)]) =
+    input.foldLeft (Company(name)) { case (company, data) =>
+      company.add_employee(Employee(name = data._1, salary = data._2))
+    }
+    
 }
 
 class ImmutableObjectSpec extends WordSpecLike with Matchers {
@@ -71,7 +79,16 @@ class ImmutableObjectSpec extends WordSpecLike with Matchers {
         employee.update_salary { s => s * 1.2 }})
 
       e1.salary should equal (10000)
+    }
 
+    "support for Repository" in {
+      val input = List(
+        ("Peter Gibbons", 10000.0),
+        ("Michael Bolton", 20000.0)
+      )
+
+      val c = Company.factory("Intech", input)
+      c.get_employee(1).get.name should equal("Peter Gibbons")
     }
   }
 }
