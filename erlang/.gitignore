@@ -1,0 +1,12 @@
+.eunit
+deps
+*.o
+*.beam
+*.plt
+erl_crash.dump
+docs/*.html
+docs/*.pdf
+docs/*.tex
+logs
+ct_run*
+ct_log_cache*
