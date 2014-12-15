@@ -393,6 +393,10 @@ reception <- AccountSystemDispatcher  :DoctorVisitCompleted("Joe, Doe")
      - Stem-Cell
      - Upgrade
 
+** Build and test
+
+*** Scala code
+    : sbt test
 
 * org-config                                                        :ARCHIVE:
 #+STARTUP: content hidestars logdone
